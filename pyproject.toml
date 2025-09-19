@@ -1,0 +1,13 @@
+[project]
+name = "unit_test_generator"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.68.0",
+    "fastapi>=0.116.2",
+    "python-dotenv>=1.1.1",
+    "ruff>=0.13.1",
+    "uvicorn>=0.35.0",
+]
