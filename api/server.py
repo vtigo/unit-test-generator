@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 
 from llm import AnthropicEngine, prompts
-from utils.file import (
-    write_test_python_file,
+from services.test_generator import (
     create_pipeline_folder,
-    save_input_code,
     run_test_file,
+    save_input_code,
+    write_test_python_file,
 )
 
 from .types import MessageRequest
@@ -14,34 +14,23 @@ UnitTestAgent = AnthropicEngine(system=prompts.unit_test_generator)
 
 app = FastAPI()
 
-# TODO: save to a folder (with id) inside data, where we store:
-# 1. the inputed code
-# 2. the unit test
-# 3. the results
-# for the specific pipeline
-
 
 @app.post("/generate_test_file")
 def generate_test_file(request: MessageRequest):
-    # Create a unique folder for this pipeline
     folder_path = create_pipeline_folder()
 
-    # Save the input code
     input_file = save_input_code(request.content, folder_path)
 
-    # Generate the unit test
-    response = UnitTestAgent.send_message(request.content)
+    agent_response = UnitTestAgent.send_message(request.content)
 
-    if isinstance(response, list) and len(response) > 0:
-        text_content = response[0].text
+    if isinstance(agent_response, list) and len(agent_response) > 0:
+        text_content = agent_response[0].text
     else:
-        text_content = str(response)
+        text_content = str(agent_response)
 
-    # Save the unit test in the same folder
     test_file_path = write_test_python_file(text_content, folder_path)
 
     if test_file_path:
-        # Run the test and get results
         test_results = run_test_file(test_file_path, folder_path)
 
         return {

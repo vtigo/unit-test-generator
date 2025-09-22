@@ -54,7 +54,6 @@ def run_test_file(test_file_path: str, folder_path: str) -> dict:
     try:
         test_filename = os.path.basename(test_file_path)
 
-        # Run pytest with just the filename, from within the folder
         result = subprocess.run(
             ["python", "-m", "pytest", test_filename, "-v", "--tb=short"],
             capture_output=True,
@@ -70,7 +69,6 @@ def run_test_file(test_file_path: str, folder_path: str) -> dict:
             "timestamp": datetime.now().isoformat(),
         }
 
-        # Save results to file
         results_file = os.path.join(folder_path, "test_results.json")
         with open(results_file, "w") as f:
             json.dump(test_results, f, indent=2)
@@ -84,7 +82,6 @@ def run_test_file(test_file_path: str, folder_path: str) -> dict:
             "timestamp": datetime.now().isoformat(),
         }
 
-        # Save error results to file
         results_file = os.path.join(folder_path, "test_results.json")
         with open(results_file, "w") as f:
             json.dump(error_results, f, indent=2)
