@@ -4,8 +4,26 @@ from adapters import CsAdapter, PythonAdapter
 
 
 def main():
-    run_cs_pipeline()
+    # # Test single string
+    # print("=" * 50)
+    # print("Testing Python with single string")
+    # print("=" * 50)
     # run_python_pipeline()
+
+    # print("\n" + "=" * 50)
+    # print("Testing Python with list of strings (async)")
+    # print("=" * 50)
+    # run_python_pipeline_batch()
+
+    # print("\n" + "=" * 50)
+    # print("Testing C# with single string")
+    # print("=" * 50)
+    # run_cs_pipeline()
+
+    print("\n" + "=" * 50)
+    print("Testing C# with list of strings (async)")
+    print("=" * 50)
+    run_cs_pipeline_batch()
 
 
 def run_python_pipeline():
@@ -18,7 +36,32 @@ def run_python_pipeline():
         return a / b"""
 
     app = PythonAdapter(input_code=input_code, work_dir=Path("storage"))
-    app.run()
+    app.run_pipeline()
+
+
+def run_python_pipeline_batch():
+    input_codes = [
+        """def multiply(a, b):
+    return a * b
+
+def power(a, b):
+    return a ** b""",
+        """def subtract(a, b):
+    return a - b
+
+def modulo(a, b):
+    if b == 0:
+        raise ValueError('modulo by zero')
+    return a % b""",
+        """def is_even(n):
+    return n % 2 == 0
+
+def is_odd(n):
+    return n % 2 != 0""",
+    ]
+
+    app = PythonAdapter(input_code=input_codes, work_dir=Path("storage"))
+    app.run_pipeline()
 
 
 def run_cs_pipeline():
@@ -50,7 +93,53 @@ def run_cs_pipeline():
 }"""
 
     app = CsAdapter(input_code=input_code, work_dir=Path("storage"))
-    app.run()
+    app.run_pipeline()
+
+
+def run_cs_pipeline_batch():
+    input_codes = [
+        """public class StringHelper
+{
+    public string ToUpper(string text)
+    {
+        return text.ToUpper();
+    }
+
+    public string Reverse(string text)
+    {
+        char[] array = text.ToCharArray();
+        Array.Reverse(array);
+        return new string(array);
+    }
+}""",
+        """public class MathHelper
+{
+    public int Max(int a, int b)
+    {
+        return a > b ? a : b;
+    }
+
+    public int Min(int a, int b)
+    {
+        return a < b ? a : b;
+    }
+}""",
+        """public class Validator
+{
+    public bool IsPositive(int n)
+    {
+        return n > 0;
+    }
+
+    public bool IsNegative(int n)
+    {
+        return n < 0;
+    }
+}""",
+    ]
+
+    app = CsAdapter(input_code=input_codes, work_dir=Path("storage"))
+    app.run_pipeline()
 
 
 if __name__ == "__main__":
