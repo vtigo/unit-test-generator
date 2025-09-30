@@ -3,14 +3,28 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
+from llm.engines import LLMEngine
+
 
 class LanguageAdapter(ABC):
     """Classe base para adapters de linguagens de programação."""
 
-    def __init__(self, input_code: str | list[str], work_dir: Path):
-        """Inicializa o adapter com código de entrada e diretório de trabalho."""
+    def __init__(
+        self,
+        input_code: str | list[str],
+        work_dir: Path,
+        llm_engine: LLMEngine,
+    ):
+        """Inicializa o adapter com código de entrada e diretório de trabalho.
+
+        Args:
+            input_code: Código fonte ou lista de códigos a processar
+            work_dir: Diretório de trabalho onde o projeto será criado
+            llm_engine: Instância do LLM engine para geração de testes
+        """
         self.input_code = input_code
         self.work_dir = work_dir
+        self.llm = llm_engine
         self.logger = None
 
     @abstractmethod

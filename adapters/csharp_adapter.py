@@ -6,8 +6,6 @@ from pathlib import Path
 from typing import Any
 
 from adapters.base import LanguageAdapter
-from llm.engines import AnthropicEngine
-from llm.prompts import cs_unit_test_generator
 
 
 class CsAdapter(LanguageAdapter):
@@ -130,10 +128,8 @@ class CsAdapter(LanguageAdapter):
         else:
             test_filename = "UnitTests.cs"
 
-        llm = AnthropicEngine(system=cs_unit_test_generator, max_tokens=2048)
-
-        # envia requisição à LLM
-        response = llm.send_message(content=code)
+        # envia requisição à LLM injetado
+        response = self.llm.send_message(content=code)
         self.logger.info("Received response from LLM")
 
         # busca o conteúdo de texto na resposta

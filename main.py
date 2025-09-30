@@ -1,6 +1,8 @@
 from pathlib import Path
 
 from adapters import CsAdapter, PythonAdapter
+from llm.engines import AnthropicEngine
+from llm.prompts import cs_unit_test_generator, python_unit_test_generator
 
 
 def main():
@@ -35,7 +37,8 @@ def run_python_pipeline():
             raise ZeroDivisionError('division by zero')
         return a / b"""
 
-    app = PythonAdapter(input_code=input_code, work_dir=Path("storage"))
+    llm = AnthropicEngine(system=python_unit_test_generator, max_tokens=2048)
+    app = PythonAdapter(input_code=input_code, work_dir=Path("storage"), llm_engine=llm)
     app.run_pipeline()
 
 
@@ -60,7 +63,10 @@ def is_odd(n):
     return n % 2 != 0""",
     ]
 
-    app = PythonAdapter(input_code=input_codes, work_dir=Path("storage"))
+    llm = AnthropicEngine(system=python_unit_test_generator, max_tokens=2048)
+    app = PythonAdapter(
+        input_code=input_codes, work_dir=Path("storage"), llm_engine=llm
+    )
     app.run_pipeline()
 
 
@@ -92,7 +98,8 @@ def run_cs_pipeline():
     }
 }"""
 
-    app = CsAdapter(input_code=input_code, work_dir=Path("storage"))
+    llm = AnthropicEngine(system=cs_unit_test_generator, max_tokens=2048)
+    app = CsAdapter(input_code=input_code, work_dir=Path("storage"), llm_engine=llm)
     app.run_pipeline()
 
 
@@ -138,7 +145,8 @@ def run_cs_pipeline_batch():
 }""",
     ]
 
-    app = CsAdapter(input_code=input_codes, work_dir=Path("storage"))
+    llm = AnthropicEngine(system=cs_unit_test_generator, max_tokens=2048)
+    app = CsAdapter(input_code=input_codes, work_dir=Path("storage"), llm_engine=llm)
     app.run_pipeline()
 
 

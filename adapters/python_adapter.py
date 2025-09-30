@@ -7,8 +7,6 @@ from pathlib import Path
 from typing import Any
 
 from adapters.base import LanguageAdapter
-from llm.engines import AnthropicEngine
-from llm.prompts import python_unit_test_generator
 
 
 class PythonAdapter(LanguageAdapter):
@@ -68,10 +66,8 @@ class PythonAdapter(LanguageAdapter):
             test_filename = "test_main.py"
             module_name = "main"
 
-        llm = AnthropicEngine(system=python_unit_test_generator, max_tokens=2048)
-
-        # envia requisição à LLM
-        response = llm.send_message(content=code)
+        # envia requisição à LLM injetado
+        response = self.llm.send_message(content=code)
         self.logger.info("Received response from LLM")
 
         # busca o conteúdo de texto na resposta
