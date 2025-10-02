@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from adapters import CsAdapter, PythonAdapter
-from executors.pipeline_executor import PipelineExecutor
+from executors import PipelineExecutor
 from llm.engines import AnthropicEngine
 from llm.prompts import cs_unit_test_generator, python_unit_test_generator
 
