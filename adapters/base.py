@@ -59,6 +59,15 @@ class LanguageAdapter(ABC):
         """Gera testes para o código de entrada."""
 
         if isinstance(input_code, list):
-            return asyncio.run(self._process_test_generation_batch(input_code))
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                # No event loop running, use asyncio.run()
+                return asyncio.run(self._process_test_generation_batch(input_code))
+            else:
+                # Event loop already running (e.g., in Jupyter), use nest_asyncio
+                import nest_asyncio
+                nest_asyncio.apply()
+                return asyncio.run(self._process_test_generation_batch(input_code))
         else:
             return self._generate_single_test(input_code)
