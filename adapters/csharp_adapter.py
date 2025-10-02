@@ -74,7 +74,7 @@ class CsAdapter(LanguageAdapter):
             "tests_path": self.tests_path,
         }
 
-    def _generate_single_test(self, code: str, index: int = 0) -> str:
+    def _generate_single_test(self, code: str) -> str:
         """Gera teste C# usando LLM e retorna o código como string."""
         # envia requisição à LLM injetado
         response = self.llm.send_message(content=code)

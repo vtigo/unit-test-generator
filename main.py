@@ -12,20 +12,20 @@ def main():
     # print("=" * 50)
     # run_python_pipeline()
 
-    print("\n" + "=" * 50)
-    print("Testing Python with list of strings (async)")
-    print("=" * 50)
-    run_python_pipeline_batch()
+    # print("\n" + "=" * 50)
+    # print("Testing Python with list of strings (async)")
+    # print("=" * 50)
+    # run_python_pipeline_batch()
 
     # print("\n" + "=" * 50)
     # print("Testing C# with single string")
     # print("=" * 50)
     # run_cs_pipeline()
 
-    # print("\n" + "=" * 50)
-    # print("Testing C# with list of strings (async)")
-    # print("=" * 50)
-    # run_cs_pipeline_batch()
+    print("\n" + "=" * 50)
+    print("Testing C# with list of strings (async)")
+    print("=" * 50)
+    run_cs_pipeline_batch()
 
 
 def run_python_pipeline():

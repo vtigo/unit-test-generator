@@ -31,7 +31,7 @@ class LanguageAdapter(ABC):
         pass
 
     @abstractmethod
-    def _generate_single_test(self, code: str, index: int) -> str:
+    def _generate_single_test(self, code: str) -> str:
         """Gera um teste unitário para o código fornecido e retorna como string."""
         pass
 
@@ -50,8 +50,8 @@ class LanguageAdapter(ABC):
     ) -> list[str]:
         """Processa múltiplos códigos de entrada de forma assíncrona."""
         tasks = [
-            asyncio.to_thread(self._generate_single_test, code, i)
-            for i, code in enumerate(input_code)
+            asyncio.to_thread(self._generate_single_test, code)
+            for code in input_code
         ]
         return await asyncio.gather(*tasks)
 
@@ -61,4 +61,4 @@ class LanguageAdapter(ABC):
         if isinstance(input_code, list):
             return asyncio.run(self._process_test_generation_batch(input_code))
         else:
-            return self._generate_single_test(input_code, 0)
+            return self._generate_single_test(input_code)
