@@ -50,8 +50,7 @@ class LanguageAdapter(ABC):
     ) -> list[str]:
         """Processa múltiplos códigos de entrada de forma assíncrona."""
         tasks = [
-            asyncio.to_thread(self._generate_single_test, code)
-            for code in input_code
+            asyncio.to_thread(self._generate_single_test, code) for code in input_code
         ]
         return await asyncio.gather(*tasks)
 
@@ -60,13 +59,14 @@ class LanguageAdapter(ABC):
 
         if isinstance(input_code, list):
             try:
-                loop = asyncio.get_running_loop()
+                asyncio.get_running_loop()
             except RuntimeError:
                 # No event loop running, use asyncio.run()
                 return asyncio.run(self._process_test_generation_batch(input_code))
             else:
                 # Event loop already running (e.g., in Jupyter), use nest_asyncio
                 import nest_asyncio
+
                 nest_asyncio.apply()
                 return asyncio.run(self._process_test_generation_batch(input_code))
         else:
