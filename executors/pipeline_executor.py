@@ -16,6 +16,7 @@ class PipelineExecutor:
         """Executa o pipeline completo: inicializa projeto, gera testes, executa e gera relatório."""
         # inicializa estrutura do projeto
         paths = self.adapter.init_project(self.work_dir)
+        project_path = paths["project_path"]
         app_path = paths["app_path"]
         tests_path = paths["tests_path"]
 
@@ -45,7 +46,7 @@ class PipelineExecutor:
         report_xml = self.adapter.generate_report(test_results)
 
         # grava o arquivo de relatório
-        report_path = paths["project_path"] / "test_report.xml"
+        report_path = project_path / "test_report.xml"
         with open(report_path, "w", encoding="utf-8") as f:
             f.write('<?xml version="1.0" encoding="utf-8"?>\n')
             f.write(report_xml)
