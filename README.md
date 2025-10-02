@@ -80,12 +80,8 @@ def div(a, b):
 llm = AnthropicEngine(system=python_unit_test_generator, max_tokens=2048)
 adapter = PythonAdapter(llm_engine=llm)
 
-pipeline = PipelineExecutor(
-    language_adapter=adapter,
-    input_code=input_code,
-    work_dir=Path("storage")
-)
-pipeline.execute()
+pipeline = PipelineExecutor(language_adapter=adapter, work_dir=Path("storage"))
+pipeline.execute(input_code)
 ```
 
 ### C# Example
