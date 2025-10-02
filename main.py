@@ -1,49 +1,50 @@
 from pathlib import Path
 
 from adapters import CsAdapter, PythonAdapter
+from executors.pipeline_executor import PipelineExecutor
 from llm.engines import AnthropicEngine
 from llm.prompts import cs_unit_test_generator, python_unit_test_generator
 
 
 def main():
-    # # Test single string
     # print("=" * 50)
     # print("Testing Python with single string")
     # print("=" * 50)
     # run_python_pipeline()
 
-    # print("\n" + "=" * 50)
-    # print("Testing Python with list of strings (async)")
-    # print("=" * 50)
-    # run_python_pipeline_batch()
+    print("\n" + "=" * 50)
+    print("Testing Python with list of strings (async)")
+    print("=" * 50)
+    run_python_pipeline_batch()
 
     # print("\n" + "=" * 50)
     # print("Testing C# with single string")
     # print("=" * 50)
     # run_cs_pipeline()
 
-    print("\n" + "=" * 50)
-    print("Testing C# with list of strings (async)")
-    print("=" * 50)
-    run_cs_pipeline_batch()
+    # print("\n" + "=" * 50)
+    # print("Testing C# with list of strings (async)")
+    # print("=" * 50)
+    # run_cs_pipeline_batch()
 
 
 def run_python_pipeline():
     input_code = """def add(a, b):
-        return a + b
+    return a + b
 
-    def div(a, b):
-        if b == 0:
-            raise ZeroDivisionError('division by zero')
-        return a / b"""
+def div(a, b):
+    if b == 0:
+        raise ZeroDivisionError('division by zero')
+    return a / b"""
 
     llm = AnthropicEngine(system=python_unit_test_generator, max_tokens=2048)
-    app = PythonAdapter(input_code=input_code, work_dir=Path("storage"), llm_engine=llm)
-    app.run_pipeline()
+    adapter = PythonAdapter(llm_engine=llm)
+    pipeline = PipelineExecutor(language_adapter=adapter, work_dir=Path("storage"))
+    pipeline.execute(input_code)
 
 
 def run_python_pipeline_batch():
-    input_codes = [
+    input_code = [
         """def multiply(a, b):
     return a * b
 
@@ -64,10 +65,9 @@ def is_odd(n):
     ]
 
     llm = AnthropicEngine(system=python_unit_test_generator, max_tokens=2048)
-    app = PythonAdapter(
-        input_code=input_codes, work_dir=Path("storage"), llm_engine=llm
-    )
-    app.run_pipeline()
+    adapter = PythonAdapter(llm_engine=llm)
+    pipeline = PipelineExecutor(language_adapter=adapter, work_dir=Path("storage"))
+    pipeline.execute(input_code)
 
 
 def run_cs_pipeline():
@@ -99,8 +99,9 @@ def run_cs_pipeline():
 }"""
 
     llm = AnthropicEngine(system=cs_unit_test_generator, max_tokens=2048)
-    app = CsAdapter(input_code=input_code, work_dir=Path("storage"), llm_engine=llm)
-    app.run_pipeline()
+    adapter = CsAdapter(llm_engine=llm)
+    pipeline = PipelineExecutor(language_adapter=adapter, work_dir=Path("storage"))
+    pipeline.execute(input_code)
 
 
 def run_cs_pipeline_batch():
@@ -146,8 +147,9 @@ def run_cs_pipeline_batch():
     ]
 
     llm = AnthropicEngine(system=cs_unit_test_generator, max_tokens=2048)
-    app = CsAdapter(input_code=input_codes, work_dir=Path("storage"), llm_engine=llm)
-    app.run_pipeline()
+    adapter = CsAdapter(llm_engine=llm)
+    pipeline = PipelineExecutor(language_adapter=adapter, work_dir=Path("storage"))
+    pipeline.execute(input_codes)
 
 
 if __name__ == "__main__":

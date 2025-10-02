@@ -1,4 +1,3 @@
-import logging
 import re
 import subprocess
 import sys
@@ -12,63 +11,36 @@ from adapters.base import LanguageAdapter
 class PythonAdapter(LanguageAdapter):
     """Adapter para projetos Python."""
 
-    def init_project(self) -> str:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.project_path: Path | None = None
+        self.app_path: Path | None = None
+        self.tests_path: Path | None = None
+
+    def init_project(self, work_dir: Path) -> dict[str, Path]:
         """Cria estrutura do projeto Python com diretórios app e tests."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         project_name = f"project_{timestamp}"
 
         # cria os diretórios
-        project_path: Path = self.work_dir / project_name
-        project_path.mkdir(parents=True, exist_ok=True)
+        self.project_path = work_dir / project_name
+        self.project_path.mkdir(parents=True, exist_ok=True)
 
-        app_path: Path = project_path / "app"
-        app_path.mkdir(exist_ok=True)
+        self.app_path = self.project_path / "app"
+        self.app_path.mkdir(exist_ok=True)
 
-        tests_path: Path = project_path / "tests"
-        tests_path.mkdir(exist_ok=True)
+        self.tests_path = self.project_path / "tests"
+        self.tests_path.mkdir(exist_ok=True)
 
-        # grava o código de input
-        if isinstance(self.input_code, list):
-            for i, code in enumerate(self.input_code):
-                file_path = app_path / f"module_{i}.py"
-                with open(file_path, "w") as f:
-                    f.write(code)
-        else:
-            main_file_path = app_path / "main.py"
-            with open(main_file_path, "w") as f:
-                f.write(self.input_code)
+        return {
+            "project_path": self.project_path,
+            "app_path": self.app_path,
+            "tests_path": self.tests_path,
+        }
 
-        # configura logging
-        log_path = project_path / "pipeline.log"
-        self.logger = logging.getLogger(project_name)
-        self.logger.setLevel(logging.INFO)
-        handler = logging.FileHandler(log_path)
-        handler.setFormatter(
-            logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-        )
-        self.logger.addHandler(handler)
-
-        self.logger.info(f"Project initialized at {project_path}")
-
-        self.project_path = project_path
-        self.tests_path = tests_path
-        self.app_path = app_path
-
-        return str(project_path)
-
-    def _generate_single_test(self, code: str, index: int) -> str:
-        """Gera arquivo de teste Python usando LLM e retorna o caminho."""
-        # determina o nome do arquivo
-        if isinstance(self.input_code, list):
-            test_filename = f"test_module_{index}.py"
-            module_name = f"module_{index}"
-        else:
-            test_filename = "test_main.py"
-            module_name = "main"
-
-        # envia requisição à LLM injetado
+    def _generate_single_test(self, code: str, index: int = 0) -> str:
+        """Gera teste Python usando LLM e retorna o código como string."""
         response = self.llm.send_message(content=code)
-        self.logger.info("Received response from LLM")
 
         # busca o conteúdo de texto na resposta
         if isinstance(response, list) and len(response) > 0:
@@ -83,22 +55,30 @@ class PythonAdapter(LanguageAdapter):
         else:
             test_code = text_content
 
-        # atualiza o import do código de teste para o diretório correto
+        return test_code
+
+    def prepare_app_code(self, code: str, index: int) -> tuple[str, str]:
+        """Prepara código Python de app e retorna (código, nome_arquivo)."""
+        filename = f"module_{index}.py" if index > 0 else "main.py"
+        return code, filename
+
+    def prepare_test_code(self, test_code: str, index: int) -> tuple[str, str]:
+        """Prepara código de teste Python e retorna (código_preparado, nome_arquivo)."""
+        module_name = f"module_{index}" if index > 0 else "main"
+        filename = f"test_module_{index}.py" if index > 0 else "test_main.py"
+
+        # ajusta imports
         test_code = test_code.replace(
             "from main import", f"from app.{module_name} import"
         )
 
-        # grava o código de teste
-        test_file_path: Path = self.tests_path / test_filename
-        with open(test_file_path, "w") as f:
-            f.write(test_code)
-
-        self.logger.info(f"Test file generated at {test_file_path}")
-        return str(test_file_path)
+        return test_code, filename
 
     def execute_tests(self) -> dict[str, Any]:
         """Executa testes Python com pytest e retorna resultados."""
-        self.logger.info("Starting test execution")
+        if not self.project_path:
+            raise RuntimeError("Project not initialized. Call init_project first.")
+
         cmd = [
             sys.executable,
             "-m",
@@ -119,12 +99,14 @@ class PythonAdapter(LanguageAdapter):
         rc = process.returncode
         stdout = process.stdout
 
-        self.logger.info(f"Test execution completed with return code {rc}")
         return {"return_code": rc, "stdout": stdout}
 
     def generate_report(self, test_results: dict[str, Any]) -> str:
-        """Gera relatório XML dos resultados dos testes e retorna o caminho."""
+        """Gera relatório XML dos resultados dos testes e retorna como string."""
         import xml.etree.ElementTree as ET
+
+        if not self.project_path:
+            raise RuntimeError("Project not initialized. Call init_project first.")
 
         root = ET.Element("test_report")
         ET.SubElement(root, "timestamp").text = datetime.now().isoformat()
@@ -135,9 +117,4 @@ class PythonAdapter(LanguageAdapter):
             "passed" if test_results["return_code"] == 0 else "failed"
         )
 
-        tree = ET.ElementTree(root)
-        report_path: Path = self.project_path / "test_report.xml"
-        tree.write(report_path, encoding="utf-8", xml_declaration=True)
-
-        self.logger.info(f"Report generated at {report_path}")
-        return str(report_path)
+        return ET.tostring(root, encoding="unicode", xml_declaration=False)
