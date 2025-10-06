@@ -1,9 +1,13 @@
 from pathlib import Path
 
-from adapters import CsAdapter, PythonAdapter
+from adapters import CsAdapter, JavaAdapter, PythonAdapter
 from executors import PipelineExecutor
 from llm.engines import AnthropicEngine
-from llm.prompts import cs_unit_test_generator, python_unit_test_generator
+from llm.prompts import (
+    cs_unit_test_generator,
+    java_unit_test_generator,
+    python_unit_test_generator,
+)
 
 
 def main():
@@ -22,10 +26,20 @@ def main():
     # print("=" * 50)
     # run_cs_pipeline()
 
+    # print("\n" + "=" * 50)
+    # print("Testing C# with list of strings (async)")
+    # print("=" * 50)
+    # run_cs_pipeline_batch()
+
+    # print("\n" + "=" * 50)
+    # print("Testing Java with single string")
+    # print("=" * 50)
+    # run_java_pipeline()
+
     print("\n" + "=" * 50)
-    print("Testing C# with list of strings (async)")
+    print("Testing Java with list of strings (async)")
     print("=" * 50)
-    run_cs_pipeline_batch()
+    run_java_pipeline_batch()
 
 
 def run_python_pipeline():
@@ -148,6 +162,71 @@ def run_cs_pipeline_batch():
 
     llm = AnthropicEngine(system=cs_unit_test_generator, max_tokens=2048)
     adapter = CsAdapter(llm_engine=llm)
+    pipeline = PipelineExecutor(language_adapter=adapter, work_dir=Path("storage"))
+    pipeline.execute(input_codes)
+
+
+def run_java_pipeline():
+    input_code = """public class Calculator {
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    public int subtract(int a, int b) {
+        return a - b;
+    }
+
+    public int multiply(int a, int b) {
+        return a * b;
+    }
+
+    public double divide(double a, double b) {
+        if (b == 0) {
+            throw new IllegalArgumentException("Cannot divide by zero");
+        }
+        return a / b;
+    }
+}"""
+
+    llm = AnthropicEngine(system=java_unit_test_generator, max_tokens=8192)
+    adapter = JavaAdapter(llm_engine=llm)
+    pipeline = PipelineExecutor(language_adapter=adapter, work_dir=Path("storage"))
+    pipeline.execute(input_code)
+
+
+def run_java_pipeline_batch():
+    input_codes = [
+        """public class StringHelper {
+    public String toUpper(String text) {
+        return text.toUpperCase();
+    }
+
+    public String reverse(String text) {
+        return new StringBuilder(text).reverse().toString();
+    }
+}""",
+        """public class MathHelper {
+    public int max(int a, int b) {
+        return a > b ? a : b;
+    }
+
+    public int min(int a, int b) {
+        return a < b ? a : b;
+    }
+}""",
+        """public class Validator {
+    public boolean isPositive(int n) {
+        return n > 0;
+    }
+
+    public boolean isNegative(int n) {
+        return n < 0;
+    }
+}""",
+    ]
+
+    llm = AnthropicEngine(system=java_unit_test_generator, max_tokens=8192)
+    adapter = JavaAdapter(llm_engine=llm)
     pipeline = PipelineExecutor(language_adapter=adapter, work_dir=Path("storage"))
     pipeline.execute(input_codes)
 
