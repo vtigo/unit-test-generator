@@ -10,6 +10,8 @@ from adapters.base import LanguageAdapter
 class JavaAdapter(LanguageAdapter):
     """Adapter para projetos Java."""
 
+    language = "java"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.project_path: Path | None = None
@@ -191,22 +193,3 @@ class JavaAdapter(LanguageAdapter):
             return {"return_code": 0, "stdout": "\n".join(all_output)}
 
         return {"return_code": 0, "stdout": "No tests found"}
-
-    def generate_report(self, test_results: dict[str, Any]) -> str:
-        """Gera relatório XML dos resultados dos testes e retorna como string."""
-        import xml.etree.ElementTree as ET
-
-        if not self.project_path:
-            raise RuntimeError("Project not initialized. Call init_project first.")
-
-        root = ET.Element("test_report")
-        ET.SubElement(root, "timestamp").text = datetime.now().isoformat()
-        ET.SubElement(root, "project_path").text = str(self.project_path)
-        ET.SubElement(root, "language").text = "java"
-        ET.SubElement(root, "return_code").text = str(test_results["return_code"])
-        ET.SubElement(root, "output").text = test_results["stdout"]
-        ET.SubElement(root, "status").text = (
-            "passed" if test_results["return_code"] == 0 else "failed"
-        )
-
-        return ET.tostring(root, encoding="unicode", xml_declaration=False)

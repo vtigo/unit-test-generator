@@ -10,6 +10,8 @@ from adapters.base import LanguageAdapter
 class CsAdapter(LanguageAdapter):
     """Adapter para projetos C#."""
 
+    language = "csharp"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.project_path: Path | None = None
@@ -152,22 +154,3 @@ class CsAdapter(LanguageAdapter):
         stdout = test_process.stdout
 
         return {"return_code": rc, "stdout": stdout}
-
-    def generate_report(self, test_results: dict[str, Any]) -> str:
-        """Gera relatório XML dos resultados dos testes C# e retorna como string."""
-        import xml.etree.ElementTree as ET
-
-        if not self.project_path:
-            raise RuntimeError("Project not initialized. Call init_project first.")
-
-        root = ET.Element("test_report")
-        ET.SubElement(root, "timestamp").text = datetime.now().isoformat()
-        ET.SubElement(root, "project_path").text = str(self.project_path)
-        ET.SubElement(root, "language").text = "csharp"
-        ET.SubElement(root, "return_code").text = str(test_results["return_code"])
-        ET.SubElement(root, "output").text = test_results["stdout"]
-        ET.SubElement(root, "status").text = (
-            "passed" if test_results["return_code"] == 0 else "failed"
-        )
-
-        return ET.tostring(root, encoding="unicode", xml_declaration=False)

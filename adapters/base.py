@@ -1,5 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -9,11 +10,14 @@ from llm.engines import LLMEngine
 class LanguageAdapter(ABC):
     """Classe base para adapters de linguagens de programação."""
 
+    language: str  # Deve ser definido nas subclasses
+
     def __init__(
         self,
         llm_engine: LLMEngine,
     ):
         self.llm = llm_engine
+        self.project_path: Path | None = None
 
     @abstractmethod
     def init_project(self, work_dir: Path) -> dict[str, Path]:
@@ -23,11 +27,6 @@ class LanguageAdapter(ABC):
     @abstractmethod
     def execute_tests(self) -> dict[str, Any]:
         """Executa os testes e retorna os resultados."""
-        pass
-
-    @abstractmethod
-    def generate_report(self, test_results: dict[str, Any]) -> str:
-        """Gera relatório dos resultados dos testes e retorna como string."""
         pass
 
     @abstractmethod
@@ -71,3 +70,22 @@ class LanguageAdapter(ABC):
                 return asyncio.run(self._process_test_generation_batch(input_code))
         else:
             return self._generate_single_test(input_code)
+
+    def generate_report(self, test_results: dict[str, Any]) -> str:
+        """Gera relatório XML dos resultados dos testes e retorna como string."""
+        import xml.etree.ElementTree as ET
+
+        if not self.project_path:
+            raise RuntimeError("Project not initialized. Call init_project first.")
+
+        root = ET.Element("test_report")
+        ET.SubElement(root, "timestamp").text = datetime.now().isoformat()
+        ET.SubElement(root, "project_path").text = str(self.project_path)
+        ET.SubElement(root, "language").text = self.language
+        ET.SubElement(root, "return_code").text = str(test_results["return_code"])
+        ET.SubElement(root, "output").text = test_results["stdout"]
+        ET.SubElement(root, "status").text = (
+            "passed" if test_results["return_code"] == 0 else "failed"
+        )
+
+        return ET.tostring(root, encoding="unicode", xml_declaration=False)
