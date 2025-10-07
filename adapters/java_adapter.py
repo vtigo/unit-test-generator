@@ -15,7 +15,7 @@ class JavaAdapter(LanguageAdapter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.project_path: Path | None = None
-        self.app_path: Path | None = None
+        self.source_path: Path | None = None
         self.tests_path: Path | None = None
 
     def init_project(self, work_dir: Path) -> dict[str, Path]:
@@ -27,15 +27,15 @@ class JavaAdapter(LanguageAdapter):
         self.project_path = work_dir / project_name
         self.project_path.mkdir(parents=True, exist_ok=True)
 
-        self.app_path = self.project_path / "src"
-        self.app_path.mkdir(exist_ok=True)
+        self.source_path = self.project_path / "src"
+        self.source_path.mkdir(exist_ok=True)
 
         self.tests_path = self.project_path / "tests"
         self.tests_path.mkdir(exist_ok=True)
 
         return {
             "project_path": self.project_path,
-            "app_path": self.app_path,
+            "source_path": self.source_path,
             "tests_path": self.tests_path,
         }
 
@@ -66,8 +66,8 @@ class JavaAdapter(LanguageAdapter):
 
         return test_code
 
-    def prepare_app_code(self, code: str, index: int) -> tuple[str, str]:
-        """Prepara código de app e retorna (código_preparado, nome_arquivo)."""
+    def prepare_source_code(self, code: str, index: int) -> tuple[str, str]:
+        """Prepara código e retorna (código_preparado, nome_arquivo)."""
         # extrai o nome da classe pública do código
         import re
 
@@ -98,7 +98,7 @@ class JavaAdapter(LanguageAdapter):
 
     def execute_tests(self) -> dict[str, Any]:
         """Executa testes e retorna resultados."""
-        if not self.tests_path or not self.app_path or not self.project_path:
+        if not self.tests_path or not self.source_path or not self.project_path:
             raise RuntimeError("Project not initialized. Call init_project first.")
 
         # cria diretório para classes compiladas
@@ -106,7 +106,7 @@ class JavaAdapter(LanguageAdapter):
         bin_path.mkdir(exist_ok=True)
 
         # compila código fonte
-        src_files = list(self.app_path.glob("*.java"))
+        src_files = list(self.source_path.glob("*.java"))
         if not src_files:
             return {
                 "return_code": 1,

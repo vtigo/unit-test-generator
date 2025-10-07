@@ -17,14 +17,14 @@ class PipelineExecutor:
         # inicializa estrutura do projeto
         paths = self.adapter.init_project(self.work_dir)
         project_path = paths["project_path"]
-        app_path = paths["app_path"]
+        source_path = paths["source_path"]
         tests_path = paths["tests_path"]
 
         # grava o código de input
         codes = input_code if isinstance(input_code, list) else [input_code]
         for i, code in enumerate(codes):
-            prepared_code, filename = self.adapter.prepare_app_code(code, i)
-            with open(app_path / filename, "w") as f:
+            prepared_code, filename = self.adapter.prepare_source_code(code, i)
+            with open(source_path / filename, "w") as f:
                 f.write(prepared_code)
 
         # gera os testes (retorna strings de código)

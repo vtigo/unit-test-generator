@@ -35,7 +35,7 @@ class LanguageAdapter(ABC):
         pass
 
     @abstractmethod
-    def prepare_app_code(self, code: str, index: int) -> tuple[str, str]:
+    def prepare_source_code(self, code: str, index: int) -> tuple[str, str]:
         """Prepara código de app e retorna (código_preparado, nome_arquivo)."""
         pass
 

@@ -16,11 +16,11 @@ class PythonAdapter(LanguageAdapter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.project_path: Path | None = None
-        self.app_path: Path | None = None
+        self.source_path: Path | None = None
         self.tests_path: Path | None = None
 
     def init_project(self, work_dir: Path) -> dict[str, Path]:
-        """Cria estrutura do projeto Python com diretórios app e tests."""
+        """Cria estrutura do projeto Python com diretórios src e tests."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         project_name = f"project_{timestamp}"
 
@@ -28,15 +28,15 @@ class PythonAdapter(LanguageAdapter):
         self.project_path = work_dir / project_name
         self.project_path.mkdir(parents=True, exist_ok=True)
 
-        self.app_path = self.project_path / "app"
-        self.app_path.mkdir(exist_ok=True)
+        self.source_path = self.project_path / "src"
+        self.source_path.mkdir(exist_ok=True)
 
         self.tests_path = self.project_path / "tests"
         self.tests_path.mkdir(exist_ok=True)
 
         return {
             "project_path": self.project_path,
-            "app_path": self.app_path,
+            "source_path": self.source_path,
             "tests_path": self.tests_path,
         }
 
@@ -59,8 +59,8 @@ class PythonAdapter(LanguageAdapter):
 
         return test_code
 
-    def prepare_app_code(self, code: str, index: int) -> tuple[str, str]:
-        """Prepara código Python de app e retorna (código, nome_arquivo)."""
+    def prepare_source_code(self, code: str, index: int) -> tuple[str, str]:
+        """Prepara código fonte e retorna (código, nome_arquivo)."""
         filename = f"module_{index}.py" if index > 0 else "main.py"
         return code, filename
 
@@ -71,7 +71,7 @@ class PythonAdapter(LanguageAdapter):
 
         # ajusta imports
         test_code = test_code.replace(
-            "from main import", f"from app.{module_name} import"
+            "from main import", f"from src.{module_name} import"
         )
 
         return test_code, filename

@@ -15,7 +15,7 @@ class CsAdapter(LanguageAdapter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.project_path: Path | None = None
-        self.app_path: Path | None = None
+        self.source_path: Path | None = None
         self.tests_path: Path | None = None
 
     def init_project(self, work_dir: Path) -> dict[str, Path]:
@@ -27,8 +27,8 @@ class CsAdapter(LanguageAdapter):
         self.project_path = work_dir / project_name
         self.project_path.mkdir(parents=True, exist_ok=True)
 
-        self.app_path = self.project_path / "src"
-        self.app_path.mkdir(exist_ok=True)
+        self.source_path = self.project_path / "src"
+        self.source_path.mkdir(exist_ok=True)
 
         self.tests_path = self.project_path / "tests"
         self.tests_path.mkdir(exist_ok=True)
@@ -41,7 +41,7 @@ class CsAdapter(LanguageAdapter):
   </PropertyGroup>
 </Project>"""
 
-        with open(self.app_path / "App.csproj", "w") as f:
+        with open(self.source_path / "App.csproj", "w") as f:
             f.write(app_csproj_content)
 
         # cria arquivo de projeto .csproj para os testes
@@ -72,7 +72,7 @@ class CsAdapter(LanguageAdapter):
 
         return {
             "project_path": self.project_path,
-            "app_path": self.app_path,
+            "source_path": self.source_path,
             "tests_path": self.tests_path,
         }
 
@@ -103,8 +103,8 @@ class CsAdapter(LanguageAdapter):
 
         return test_code
 
-    def prepare_app_code(self, code: str, index: int) -> tuple[str, str]:
-        """Prepara código C# de app e retorna (código_preparado, nome_arquivo)."""
+    def prepare_source_code(self, code: str, index: int) -> tuple[str, str]:
+        """Prepara código e retorna (código_preparado, nome_arquivo)."""
         filename = f"Module_{index}.cs" if index > 0 else "Program.cs"
 
         # adiciona using System se necessário

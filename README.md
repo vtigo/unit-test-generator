@@ -143,7 +143,7 @@ Generated projects are saved in the `storage/` directory with timestamped folder
 **Python projects:**
 
 - `storage/project_YYYYMMDD_HHMMSS/`
-  - `app/` - Source code files (main.py or module\_\*.py)
+  - `src/` - Source code files (main.py or module\_\*.py)
   - `tests/` - Generated test files (test*main.py or test_module*\*.py)
   - `test_report.xml` - Test execution results
 
@@ -158,10 +158,10 @@ Generated projects are saved in the `storage/` directory with timestamped folder
 
 1. **Initialization**: `PipelineExecutor` receives a `LanguageAdapter`, input code, and working directory
 2. **Project Setup**: Adapter creates project structure (directories, config files)
-3. **Code Preparation**: Adapter prepares app code (adds imports, namespaces)
+3. **Code Preparation**: Adapter prepares source code (adds imports, namespaces)
 4. **Test Generation**: Adapter sends code to LLM and extracts test code
 5. **Test Preparation**: Adapter prepares test code (adjusts imports)
-6. **File Writing**: Executor writes all files (app code, test code)
+6. **File Writing**: Executor writes all files (source code, test code)
 7. **Execution**: Adapter runs tests (pytest for Python, dotnet test for C#)
 8. **Reporting**: Adapter generates XML report, executor writes it
 
@@ -179,7 +179,7 @@ To add support for a new language:
 2. Implement abstract methods:
    - `init_project()` - Create project structure
    - `_generate_single_test()` - Generate test code via LLM
-   - `prepare_app_code()` - Prepare app code and return (code, filename)
+   - `prepare_source_code()` - Prepare source code and return (code, filename)
    - `prepare_test_code()` - Prepare test code and return (code, filename)
    - `execute_tests()` - Run tests and return results
    - `generate_report()` - Generate XML report string
